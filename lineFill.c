@@ -4,7 +4,6 @@
 #include "cbmp.h"
 
 typedef unsigned int uint;
-typedef unsigned short ushort;
 typedef unsigned char uchar;
 typedef char bool;
 
@@ -16,19 +15,6 @@ const char offsetPatterns[4][5][2] = {{{-1, 1}, {-1, 2}, {0, 2}, {1, 2}, {1, 1}}
 const char dirPatterns[4][2] = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
 
 BMP* bmp;
-
-// Distance color stuff
-ushort TwoUCharsToUShort(uchar a, uchar b){
-	return (((ushort)a) << 8) | (0x00ff & b);
-}
-
-void UShortToTwoUChars(uchar* a, uchar* b, ushort in){
-	*b = in; // to copy the first 8 bits.
-	in = in >> 8; //push the other 8 bits to the right
-	*a = in;
-}
-
-// The rest:
 
 uchar dirRotated(uchar direction, char rotation){
 	while (rotation < 0){
@@ -46,18 +32,15 @@ bool checkMove(uchar dir, uint x, uint y){
 	return (hits > 0) ? 0 : 1;
 }
 
-uchar findBacktrack(ushort currentDistance, uint x, uint y){
+uchar findBacktrack(uchar currentDistance, uint x, uint y){
 	uchar r, g, b;
-	ushort arb, distance;
 	for (uchar dir = 0; dir < 4; dir++) {
 		get_pixel_rgb(bmp, x + dirPatterns[dir][0], y + dirPatterns[dir][1], &r, &g, &b);
-		distance = TwoUCharsToUShort(g, b);
-		arb = currentDistance - 1;
-		if (distance == arb){
+		currentDistance--;
+		if (g == currentDistance){
 			return dir;
 		}
 	}
-	printf("distance: %d vs %d : %d\n", arb, distance, r);
 	fprintf(stderr, "stranded\n");
 	return 10;
 }
@@ -82,14 +65,14 @@ int main(int argc, char** argv){
 	// Create variables
 	uint startx, starty;
   uint x, y;
-	ushort distance = 0;
+	uchar distance = 0;
 
 	// Assign start values
 	startx = x = atoi(argv[3]);
 	starty = y = atoi(argv[4]);
 
 	// Set Start pixel
-	set_pixel_rgb(bmp, x, y, 5, 255, 0);
+	set_pixel_rgb(bmp, x, y, 5, 0, 255);
 
 	// Main loop
 	uint limitCounter = 0;
@@ -117,12 +100,7 @@ int main(int argc, char** argv){
 			if (findBacktrack(distance, x, y) == 10) goto finish;
 			moveDir = findBacktrack(distance, x, y);
 			Backtrack = 1;
-			if (distance == 0){
-				distance--;
-				printf("%d\n", distance);
-			} else {
-				distance--;
-			}
+			distance--;
 		}
 
 		// Move
@@ -131,9 +109,7 @@ int main(int argc, char** argv){
 
 		// Set pixel value
 		if (!Backtrack){
-			uchar g, b;
-			UShortToTwoUChars(&g, &b, distance);
-			set_pixel_rgb(bmp, x, y, 255, g, b);
+			set_pixel_rgb(bmp, x, y, 255, distance, 0);
 		}
   }
 
@@ -145,7 +121,7 @@ finish:
 
 		// Show finish point
 		printf("finished: %d %d\n", x, y);
-		set_pixel_rgb(bmp, x, y, 5, 0, 255);
+		set_pixel_rgb(bmp, x, y, 5, 255, 0);
 
 	  // Write bmp contents to file
 	  bwrite(bmp, argv[2]);
