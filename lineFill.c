@@ -34,10 +34,10 @@ bool checkMove(uchar dir, uint x, uint y){
 
 uchar findBacktrack(uchar currentDistance, uint x, uint y){
 	uchar r, g, b;
+	currentDistance--;
 	for (uchar dir = 0; dir < 4; dir++) {
 		get_pixel_rgb(bmp, x + dirPatterns[dir][0], y + dirPatterns[dir][1], &r, &g, &b);
-		currentDistance--;
-		if (g == currentDistance){
+		if (g == currentDistance && r != 0){
 			return dir;
 		}
 	}
