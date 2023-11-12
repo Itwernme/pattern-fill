@@ -7,7 +7,6 @@ typedef unsigned int uint;
 typedef unsigned char uchar;
 typedef char bool;
 
-const uint limit = 10000000;
 const char offsetPatterns[4][5][2] = {{{-1, 1}, {-1, 2}, {0, 2}, {1, 2}, {1, 1}},
 																			{{1, -1}, {2, -1}, {2, 0}, {2, 1}, {1, 1}},
 																			{{-1, -1}, {-1, -2}, {0, -2}, {1, -2}, {1, -1}},
@@ -34,10 +33,10 @@ bool checkMove(uchar dir, uint x, uint y){
 
 uchar findBacktrack(uchar currentDistance, uint x, uint y){
 	uchar r, g, b;
+	currentDistance--;
 	for (uchar dir = 0; dir < 4; dir++) {
 		get_pixel_rgb(bmp, x + dirPatterns[dir][0], y + dirPatterns[dir][1], &r, &g, &b);
-		currentDistance--;
-		if (g == currentDistance){
+		if (g == currentDistance && r != 0){
 			return dir;
 		}
 	}
@@ -75,9 +74,9 @@ int main(int argc, char** argv){
 	set_pixel_rgb(bmp, x, y, 5, 0, 255);
 
 	// Main loop
-	uint limitCounter = 0;
-  while ((x != startx || y != starty || limitCounter == 0)){//&& limitCounter < limit
-		limitCounter++;
+	unsigned long stepCounter = 0;
+  while ((x != startx || y != starty || stepCounter == 0)){
+		stepCounter++;
 
 		// Find possible move directions
 		uchar possDirs[4];
@@ -114,13 +113,10 @@ int main(int argc, char** argv){
   }
 
 finish:
-		// Print end status
-		if (limitCounter == limit){
-			printf("limit reached!\n");
-		}
 
 		// Show finish point
 		printf("finished: %d %d\n", x, y);
+		printf("steps: %lu\n", stepCounter);
 		set_pixel_rgb(bmp, x, y, 5, 255, 0);
 
 	  // Write bmp contents to file

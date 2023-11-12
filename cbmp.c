@@ -137,6 +137,7 @@ void get_pixel_rgb(BMP* bmp, int x, int y, unsigned char* r, unsigned char* g, u
 		*r = 255;
 		*g = 255;
 		*b = 255;
+		printf("Looking outside image\n");
 	}
 	*r = bmp->pixels[index].red;
 	*g = bmp->pixels[index].green;
